@@ -29,14 +29,14 @@ namespace MediaOrganizer
                 if (!Directory.Exists(yearDirectoryName)) Directory.CreateDirectory(yearDirectoryName);
 
                 // if year directory does not exist create it
-                var monthDirectoryName = String.Format("{0}", Path.Combine(yearDirectoryName , dateTaken.Month.ToString().PadLeft(2, '0'))); 
+                var monthDirectoryName = string.Format("{0}", Path.Combine(yearDirectoryName , dateTaken.Month.ToString().PadLeft(2, '0'))); 
 
                 // check for year/month directory
                 // if year/month directory does not exist create it
                 if (!Directory.Exists(monthDirectoryName)) Directory.CreateDirectory(monthDirectoryName);
 
                 // copy image to directory
-                File.Move(photoPath, String.Format("{0}\\{1}", monthDirectoryName, photoFileName));
+                File.Move(photoPath, string.Format("{0}\\{1}", monthDirectoryName, photoFileName));
             }
 
         }

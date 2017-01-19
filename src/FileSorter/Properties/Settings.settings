@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FileSorter.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ApplicationName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="GeoCodeApiKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AIzaSyD6tG011PLLDon_rhncAPWOxmh03vWPEfM</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

@@ -83,6 +83,7 @@
             this.buttonTargetFolder.TabIndex = 14;
             this.buttonTargetFolder.Text = "Open Target Folder";
             this.buttonTargetFolder.UseVisualStyleBackColor = true;
+            this.buttonTargetFolder.Click += new System.EventHandler(this.buttonTargetFolder_Click);
             // 
             // textBoxSourceFolder
             // 
@@ -100,6 +101,7 @@
             this.buttonSelectSourceFolder.TabIndex = 12;
             this.buttonSelectSourceFolder.Text = "Open Source Folder";
             this.buttonSelectSourceFolder.UseVisualStyleBackColor = true;
+            this.buttonSelectSourceFolder.Click += new System.EventHandler(this.buttonSelectSourceFolder_Click);
             // 
             // backgroundWorkerSort
             // 

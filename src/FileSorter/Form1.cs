@@ -75,26 +75,35 @@ namespace FileSorter
 
         public void PerformSort()
         {
-            foreach (var sourceDirectoryFile in Directory.EnumerateFiles(textBoxSourceFolder.Text, textBoxSearchPattern.Text))
+            var sourceFiles = Directory.EnumerateFiles(textBoxSourceFolder.Text, textBoxSearchPattern.Text);
+
+            foreach (var sourceFile in sourceFiles)
             {
                 if (backgroundWorkerSort.CancellationPending) return;
 
-                var sourceFilename = new FileInfo(sourceDirectoryFile).Name;
+                var sourceFilename = new FileInfo(sourceFile).Name;
                 var dateTaken = new DateTime();
 
-                using (var fs = new FileStream(sourceDirectoryFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var fs = new FileStream(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     var metadata = (BitmapMetadata)BitmapFrame.Create(fs).Metadata;
                     if (metadata != null) DateTime.TryParse(metadata.DateTaken, out dateTaken);
+
+                    if (dateTaken == DateTime.MinValue)
+                    {
+                        var fileInfo = new FileInfo(sourceFile);
+                        dateTaken = fileInfo.LastWriteTime;
+                    }
                 }
 
+                
                 var targetDirectoryWithYear = Path.Combine(textBoxTargetFolder.Text, dateTaken.Year.ToString());
                 if (!Directory.Exists(targetDirectoryWithYear)) Directory.CreateDirectory(targetDirectoryWithYear);
 
                 var targetDirectoryWithYearAndMonth = string.Format("{0}", Path.Combine(targetDirectoryWithYear, dateTaken.Month.ToString().PadLeft(2, '0')));
                 if (!Directory.Exists(targetDirectoryWithYearAndMonth)) Directory.CreateDirectory(targetDirectoryWithYearAndMonth);
 
-                var imageLocation = GetImageLocation(sourceDirectoryFile);
+                var imageLocation = GetImageLocation(sourceFile);
                 var targetDirectoryWithYearAndMonthAndLocation = targetDirectoryWithYearAndMonth;
                 if (!string.IsNullOrEmpty(imageLocation))
                 {
@@ -106,7 +115,7 @@ namespace FileSorter
                 var targetDirectoryWithYearAndMonthAndLocationAndFilename = string.Format("{0}\\{1}",
                     targetDirectoryWithYearAndMonthAndLocation, sourceFilename);
 
-                File.Copy(sourceDirectoryFile, targetDirectoryWithYearAndMonthAndLocationAndFilename);
+                File.Copy(sourceFile, targetDirectoryWithYearAndMonthAndLocationAndFilename, true);
 
                 var progressText = string.Format(@"File {0} copied", sourceFilename);
                 backgroundWorkerSort.ReportProgress(0, progressText);
@@ -117,27 +126,34 @@ namespace FileSorter
         {
             var location = string.Empty;
 
-            var imageMetaData = ImageMetadataReader.ReadMetadata(sourceDirectoryFile);
-            var directory = imageMetaData.FirstOrDefault(x => x.Name == "GPS");
+            //try
+            //{
+            //    var imageMetaData = ImageMetadataReader.ReadMetadata(sourceDirectoryFile);
+            //    var directory = imageMetaData.FirstOrDefault(x => x.Name == "GPS");
 
-            if (directory == null) return location;
+            //    if (directory == null) return location;
 
-            var tags = directory.Tags;
-            var gpsLatitudeDegrees = tags.First(x => x.Name == "GPS Latitude").Description;
-            //var gpsLatitudeHemisphere = tags.First(x => x.Name == "GPS Latitude Ref").Description;
-            var latitude = ConvertDegreeAngleToDouble(gpsLatitudeDegrees);
+            //    var tags = directory.Tags;
+            //    var gpsLatitudeDegrees = tags.First(x => x.Name == "GPS Latitude").Description;
+            //    //var gpsLatitudeHemisphere = tags.First(x => x.Name == "GPS Latitude Ref").Description;
+            //    var latitude = ConvertDegreeAngleToDouble(gpsLatitudeDegrees);
 
-            var gpsLongitude = tags.First(x => x.Name == "GPS Longitude").Description;
-            //var gpsLongitudeHemisphere = tags.First(x => x.Name == "GPS Longitude Ref").Description;
-            var longitude = ConvertDegreeAngleToDouble(gpsLongitude);
+            //    var gpsLongitude = tags.First(x => x.Name == "GPS Longitude").Description;
+            //    //var gpsLongitudeHemisphere = tags.First(x => x.Name == "GPS Longitude Ref").Description;
+            //    var longitude = ConvertDegreeAngleToDouble(gpsLongitude);
 
-            var geoCoder = new GoogleGeocoder() {ApiKey = Properties.Settings.Default.GeoCodeApiKey};
-            var result = geoCoder.ReverseGeocode(latitude, longitude).First();
+            //    var geoCoder = new GoogleGeocoder() { ApiKey = Properties.Settings.Default.GeoCodeApiKey };
+            //    var result = geoCoder.ReverseGeocode(latitude, longitude).First();
 
-            var state = result.Components[5].LongName;
-            var city = result.Components[2].LongName;
+            //    var state = result.Components[5].LongName;
+            //    var city = result.Components[2].LongName;
 
-            location = string.Format("{0}, {1}", city, state);
+            //    location = string.Format("{0}, {1}", city, state);
+            //}
+            //catch
+            //{
+            //   // Ignore
+            //}
 
             return location;
         }
@@ -155,6 +171,24 @@ namespace FileSorter
             //    result = result * -1;
 
             return result;
+        }
+
+        private void buttonSelectSourceFolder_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.Description = "Open source folder";
+            if (folderBrowserDialog1.ShowDialog(this) == DialogResult.OK)
+            {
+                textBoxSourceFolder.Text = folderBrowserDialog1.SelectedPath;
+            }
+        }
+
+        private void buttonTargetFolder_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.Description = "Open target folder";
+            if (folderBrowserDialog1.ShowDialog(this) == DialogResult.OK)
+            {
+                textBoxTargetFolder.Text = folderBrowserDialog1.SelectedPath;
+            }
         }
     }
 }
